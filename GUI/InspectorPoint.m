@@ -1,0 +1,189 @@
+classdef InspectorPoint < handle
+    %INSPECTORSYSTEM Summary of this class goes here
+    %   Detailed explanation goes here
+    
+    properties
+        index
+        curve
+        label
+        
+        startdata = []
+        contdata = []
+        
+        passon
+        
+        P0
+    end
+    
+    methods
+        
+        function obj = InspectorPoint(passon ,curve,label)
+            obj.passon = passon;
+            obj.label = label;
+            obj.curve = curve;
+
+            if (~curve.isEmpty())
+                obj.P0 = curve.extractP0();
+                if (isempty(obj.P0))
+                   obj.P0 = NaN * ones(1, length( passon.system.getParameterList() ));
+                end
+                [obj.startdata, obj.contdata] = ContinuerOptionInterface.reconstructData(passon.system , curve.getCurveType(), ...
+                    curve.globals.cds , obj.P0 , curve.extractIterationN() , curve.x(:,1));
+                
+            end
+        end
+        
+
+        function backOnTop(obj)
+           printc(mfilename,'backontop'); 
+        end
+        function list = getList(obj)
+                s = obj.curve.s;
+                n = length(s);
+                list = cell(1,n);
+                for i = 1:n
+                   list{i} = [InspectorPoint.dedeblank(s(i).label) s(i).msg]; 
+                end
+        end
+        
+        function bool = goUp(obj)
+           bool = 1; 
+        end
+        function b = isValidSelection(obj)
+           b = (obj.index > 0); 
+        end
+        function newobj = selectItem(obj,index) 
+            obj.loadPoint();
+            newobj = [];
+        end
+        function keypress(obj,e)          
+        end        
+        function label = getLabel(obj)
+            label = obj.label;
+        end
+        function flist = getOperations(obj)
+            flist{1} = cmdStruct(@() 'Load Curve' , @() obj.loadInCurve() );
+            flist{2} = cmdStruct(@() 'View StarterData' , @() StarterPanel(figure,  obj.startdata));
+            flist{3} = cmdStruct(@() 'View ContinuerData' , @() ContinuerPanel(figure, obj.contdata));
+            flist{4} = cmdStruct(@() 'View CurveData'  ,    @() obj.previewPanel());
+            
+        end
+        function initIndex(obj)
+            if isempty(obj.curve.s)
+            obj.index = -1;
+            else
+                obj.index = 1;
+            end
+        end
+        function flist = getItemOperations(obj)
+           flist{1} = cmdStruct(@() 'Select Point' ,    @()  obj.loadPoint());
+          
+        end
+        function flist = getInheritedOperations(obj)
+           flist = {}; 
+        end
+%         function name = currentItemName(obj)
+%             if (obj.index < 0)
+%                 i = 1;
+%             else
+%                 i = obj.index; 
+%             end
+%             name = obj.list{i};
+%         end  
+
+        function data = getPreviewData(obj)
+            data = [];
+        end
+        function data = getSelectedPreviewData(obj) 
+            if (obj.passon.preview && (obj.index >= 1))
+                coords = obj.startdata.getCoordinates();
+                params = obj.startdata.getParameters();
+               
+                X = obj.curve.x(: , obj.curve.s(obj.index).index );
+                
+                data.coordinates = cell(length(coords) , 2);
+                data.parameters = cell(length(params) , 2);
+                
+                for i = 1:length(coords)
+                    data.coordinates{i,1} = coords{i};
+                    data.coordinates{i,2} = X(i);
+                end
+                
+		
+                [nrpoints , dim] = obj.curve.getNrPoints();
+                if (isempty(dim))
+                   dim = length(coords); 
+                end
+                x_index = nrpoints * dim;
+                if (nrpoints > 1) %OR: curvetype is HE/HO/HetT/HomT
+		     riclen = obj.curve.getRiccatiLength();
+                    x_index = x_index + riclen; %skip YS,YU  
+                end
+                
+                for i = 1:length(params)
+                   data.parameters{i , 1} = params{i};
+                   
+                   if (obj.startdata.getFreeParameter(params{i}))
+                       x_index = x_index + 1; 
+                       data.parameters{i , 2} = X(x_index);
+                   else
+                       data.parameters{i , 2} = obj.P0(i);
+                   end
+                end
+                
+            else
+                data = [];
+            end
+        end
+        
+        function type = getType(obj)
+            type = 4;
+        end
+        
+        function loadInCurve(obj)
+            session = obj.passon.session;
+            session.changeCurve(obj.passon.system , obj.passon.curvemanager, obj.curve, obj.startdata , obj.contdata);
+            obj.passon.killswitch();
+            %disp('starter & continuer');
+        end
+        
+        function loadPoint(obj)
+           
+            
+            obj.passon.preview = 1; %FIXME
+            pointdata = obj.getSelectedPreviewData();
+            
+            
+            selectedpoint = obj.curve.s(obj.index);
+            
+            session = obj.passon.session;
+	   
+            session.loadInPoint( obj.passon.system , obj.passon.curvemanager, obj.curve, selectedpoint , pointdata , obj.startdata, obj.contdata);
+                     
+            obj.passon.killswitch();
+            
+            
+            MainPanel.popupInput(obj.passon.session);
+            
+        end
+        function previewPanel(obj)
+            tablepreviews.previewPanel(obj.curve);
+        end
+         function str = getToolTipString(obj)
+            str = 'double-click to select a point';
+        end       
+    end
+    
+    methods(Static)
+        function str = dedeblank(str)
+           len = length(str);
+           str = [str blanks(7 - len)];
+        end
+    end
+end
+
+function s = cmdStruct(label, cmd)
+    s = struct('label' , label , 'cmd' , cmd);
+end
+
+

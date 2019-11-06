@@ -1,0 +1,43 @@
+% Plot invariant curves
+function out = PIC(X, dim1, dim2)
+global civds
+
+% Extract the Fourier coefficients from X for each column
+[n1,n2] = size(X); %n1 is the amount of rows, n2 the amount of columns
+clist = colormap(hsv(3*n2)); % The color range we will plot. n2 is the entire color range, the multiplier c (=3 here) means we only want the first 1/3 
+% For every column we plot the closed invariant curve
+for col = 1:1:n2
+    x = X(:,col:col);
+    x = [x(1:2*civds.n+civds.zerocomponent); 0; x(2*civds.n+1+civds.zerocomponent:end-2)];
+    theta = linspace(0,2*pi);
+    V = FCMAP(theta,x);
+    x1 = V(dim1:dim1,:);
+    x2 = V(dim2:dim2,:);
+    plot(x1,x2,'color',clist(col,:))
+    hold on
+end
+hold off
+%legend show
+% x = linspace(0,10,50);
+% y1 = sin(x);
+% plot(x,y1)
+% title('Combine Plots')
+% 
+% hold on
+% 
+% y2 = sin(x/2);
+% plot(x,y2)
+% 
+% y3 = 2*sin(x);
+% scatter(x,y3) 
+% 
+% hold off
+
+% vector = x1((1 + (col-1)*153):(1 + col*153));
+% theta = linspace(0,2*pi);
+% V = FCMAP(theta, vector);
+% x = V(1:1,:);
+% y = V(2:2,:);
+% plot(x,y);
+% out = length(x1);
+end

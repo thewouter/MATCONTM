@@ -1,0 +1,21 @@
+disp('>> global x12 v12 s12  opt cds  fpmds');
+global x12 v12 s12 opt cds  fpmds
+%LeslieGower12;
+disp('>> opt = contset; ');
+opt = contset;
+disp('>> opt = contset(opt,''Multipliers'',1); ');
+opt = contset(opt,'Multipliers',1);
+disp('>>x1=x12(1:4,s12(5).index);p1=p;p1(fpmds.ActiveParams)=x12(5,s12(5).index); ');
+x1=x12(1:4,s12(5).index);p1=p;p1(fpmds.ActiveParams)=x12(5,s12(5).index); 
+disp('>> opt=contset(opt,''MaxNumPoints'',250);');
+opt = contset(opt,'Singularities',1);
+opt=contset(opt,'MaxNumPoints',250);
+disp('>> [x2,v2]=init_BPm_FPm(@LeslieGower,x1,p1,s12(5),0.01);');
+[x2,v2]=init_BPm_FPm(@LeslieGower,x1,p1,s12(5),0.00001,1);
+opt=contset(opt,'backward',0);
+disp('>> [x131,v131,s131,h131,f131]=cont(@@fixedpointmap,x2,[],opt);');
+[x131,v131,s131,h131,f131]=cont(@fixedpointmap,x2,[],opt);
+disp('>> opt = contset(opt,''backward'',1);');
+opt=contset(opt,'backward',1);
+disp('>> [x132,v132,s132,h132,f132]=cont(@fixedpointmap,x2,[],opt);');
+[x132,v132,s132,h132,f132]=cont(@fixedpointmap,x2,[],opt);
