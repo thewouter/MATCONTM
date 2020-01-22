@@ -30,7 +30,7 @@ classdef DefaultCurve < handle
                 obj.addDefault( 'CO' , obj.ANY ,   'init_Hom_Hom');
                 obj.addDefault( 'LP_HE' , obj.ANY ,   'init_HetT_HetT');
                 obj.addDefault( 'LP_HO' , obj.ANY ,   'init_HomT_HomT');
-                obj.addDefault( 'P' , obj.ANY , 'Orbit');
+                obj.addDefault( 'IC', obj.ANY , 'init_ICm_ICm');
             
             
         end

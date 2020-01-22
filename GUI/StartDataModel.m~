@@ -67,7 +67,7 @@ classdef StartDataModel < handle
             obj.settings.ADnumber = DefaultValues.STARTDATA.ADnumber;
             obj.settings.amplitude = DefaultValues.STARTDATA.amplitude;
             obj.settings.epsilon = DefaultValues.STARTDATA.epsilon;
-            obj.settings.fourierModes = DefaultValues.STARTDATA.fourierModes;
+            obj.settings.epsilon = DefaultValues.STARTDATA.epsilon;
             obj.settings.orbitpoints = DefaultValues.STARTDATA.orbitpoints;
             obj.enabled.FieldsModel = 0;
             obj.jacobiandata.increment = DefaultValues.STARTDATA.increment;

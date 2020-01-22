@@ -128,6 +128,7 @@ classdef InspectorCurve < handle
         end
         
         function loadCurve(obj) 
+            
             itemname = obj.currentItemName();
             
             Curve.installCurve(obj.passon.session  ,obj.passon.system ,  obj.curvemanager, itemname);

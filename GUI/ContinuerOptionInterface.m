@@ -30,6 +30,7 @@ classdef ContinuerOptionInterface < handle
             
             obj.mapping.MaxNumPoints = @() obj.contdata.getStopData('MaxNumPoints');
             obj.mapping.ClosedCurve = @() obj.contdata.getStopData('ClosedCurve');
+            obj.mapping.NonCNFourier = @() obj.contdata.getStopData('NonCNFourier');
             
             
             obj.mapping.ActiveParams = @() obj.getAdaptParam();
@@ -170,6 +171,7 @@ classdef ContinuerOptionInterface < handle
             contdata.setBackwards(cds.options.Backward);
             
             if(isfield(cds.options,'ClosedCurve')), contdata.setStopData('ClosedCurve'  , cds.options.ClosedCurve); end
+            if(isfield(cds.options,'NonCNFourier')), contdata.setStopData('NonCNFourier'  , cds.options.NonCNFourier); end
             
             for i = cds.options.ActiveParams
                 startdata.setFreeParameterByIndex(i , true);

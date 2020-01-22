@@ -20,7 +20,7 @@ else
     sOutput = struct();
     sOutput.enabled = false;
     sOutput.setStatus = @(varargin) 0;  %dummy function, does nothing, takes any variables
-%     sOutput.endRun = @(varargin) 0;
+    sOutput.endRun = @(varargin) 0;
     sOutput.output = @(varargin) 0;
 end
 
@@ -290,9 +290,6 @@ else
     Locators              = contget(cds.options, 'Locators', []);
     IgnoreSings           = contget(cds.options, 'IgnoreSingularity', []);
     UserInfo              = contget(cds.options, 'UserfunctionsInfo', []);
-    NonCNFourier          = contget(cds.options, 'NonCNFourier', 1);
-    
-    options = feval(cds.curve_options);
   
     if Singularities
         ActTest = cds.ActTest;
@@ -469,7 +466,7 @@ while i < npoints
                       end                          
                   end
               end %end of detect/locate loop   
-              if ~isempty(sid)         % sort loop over found singularities
+              if ~isempty(sid)         % sort
                   [xss,vss,sid] = xssort(x1, xss, vss, sid);
                   % WM: moved out of loop for speed
                   sids = 1:length(sid);
@@ -553,7 +550,7 @@ while i < npoints
                   s.index = i;
                   s.label = UserInfo(uid(ui)).label;%r
                  [failed,uf,s] = DefaultProcessor(xus(:,ui), vus(:,ui), s);
-                  [ufvals,failed] = feval(cds.curve_userf, UserInfo,1:cds.nUserf, xus(:,ui), vus(:,ui));
+                  [ufvals,failed] =feval(cds.curve_userf, UserInfo,1:cds.nUserf, xus(:,ui), vus(:,ui));
                   s.data.userfunctions = ufvals;%reza
                   if Singularities
                       [tfvals,failed] = EvalTestFunc(ActTest,xus(:,ui),vus(:,ui));
@@ -639,12 +636,12 @@ while i < npoints
       doStop = sOutput.checkPauseResumeStop(s.index , s.msg ,i);
       if doStop~=0, npoints = i;end  %npoints = i ---> end of mainloop
   end
-  if NonCNFourier > 0 && isfield(options, 'nphase')
+  if NonCNFourier > 0
       NN = ((numel(x2) - 1)/ options.nphase -1 )/2;
       if abs(floor(NN) - NN) < 0.000001 %x2 is indeed an array of fourier modes
           if ICstop(options.nphase, x2,  NonCNFourier)
               npoints = i;
-              printconsole('Fourier coefficients not in C%d at step %d\n', NonCNFourier, i);
+              printconsole('Closed curve detected at step %d\n', i);
           end
       end
   end

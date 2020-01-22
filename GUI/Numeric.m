@@ -70,7 +70,7 @@ classdef Numeric < handle
             
         
             
-            %FIXME:  handles propper verwijderen , of via een paneldestruct
+            %FIXME:  handles proper verwijderen , of via een paneldestruct
             %? 
             obj.handleList = struct();
             

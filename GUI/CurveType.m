@@ -12,6 +12,7 @@ classdef CurveType < handle
            obj.curvetypelist{end+1} = CurveType_LP(); 
            obj.curvetypelist{end+1} = CurveType_PD(); 
            obj.curvetypelist{end+1} = CurveType_NS();
+           obj.curvetypelist{end+1} = CurveType_IC();
            obj.curvetypelist{end+1} = CurveType_O();
            obj.curvetypelist{end+1} = CurveType_LYA();
            obj.curvetypelist{end+1} = CurveType_HO();

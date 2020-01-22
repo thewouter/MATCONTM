@@ -44,16 +44,16 @@ classdef Curve < handle
                 load(filename);
                 %TODO: check of alle vars erin zitten  FIXME
                 obj.setData(x,v,s,h,f); %from file
- 		
-		if(exist('multiplyIterationN' , 'var'))
-			obj.multiplyIterationN = multiplyIterationN;
-		end
-		if(exist('initUsed' , 'var'))
-			obj.initUsed = initUsed;
-        end	
- 		if(exist('initialpointdata' , 'var'))
-			obj.startpoint = initialpointdata;
-        end	       
+
+                if(exist('multiplyIterationN' , 'var'))
+                    obj.multiplyIterationN = multiplyIterationN;
+                end
+                if(exist('initUsed' , 'var'))
+                    obj.initUsed = initUsed;
+                end	
+                if(exist('initialpointdata' , 'var'))
+                    obj.startpoint = initialpointdata;
+                end	       
                 pointtypelbl = deblank(point);
                 curvetypelbl = deblank(ctype);
                 obj.curvetype = CurveType.getCurveTypeObject(curvetypelbl);
@@ -64,11 +64,11 @@ classdef Curve < handle
                 %load in curvetype dependant global vars
                 list = obj.curvetype.getDependantGlobalVars();
                 for i = 1:length(list)
-                  if (exist(list{i} , 'var'))
-                    eval(['obj.globals.'  list{i}  '  =  ' list{i}  ' ;']);
-                  else
-                    warning(['expected ' list{i} ' to be in ' filename]);
-                  end
+                    if (exist(list{i} , 'var'))
+                        eval(['obj.globals.'  list{i}  '  =  ' list{i}  ' ;']);
+                    else
+                        warning(['expected ' list{i} ' to be in ' filename]);
+                    end
                 end
                 
             elseif(nargin == 6)

@@ -28,6 +28,7 @@ Names = [
     'MaxNumPoints     '
     'Backward         '
     'CheckClosed      '
+    'NonCNFourier     '
     'TestFunctions    '
     'WorkSpace        '
     'Locators         '

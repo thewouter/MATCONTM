@@ -52,7 +52,6 @@ classdef SelectBranchListbox < handle
         function setSelected(obj, branchmanager)
            j =  branchmanager.getSelectionIndex();
 
-           
            printc(mfilename, 'setSelect:  index=%d' , j);
            if (branchmanager.validSelectionMade())
                set(obj.handle , 'String' , obj.strlist  ,  'Value' , j); 

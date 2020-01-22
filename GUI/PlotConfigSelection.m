@@ -127,8 +127,17 @@ classdef PlotConfigSelection < handle
         function funchandle = retrieveSelection_coord(obj, session , curve)
             index = obj.options.value;
             assert(index > 0);
-            funchandle = @(xout, hout, fout, it) xout(index,it);
-
+            if (nargin < 3)
+                ctlbl = session.getCurveType().getLabel();
+            else
+                ctlbl = curve.getCurveType().getLabel();
+            end
+            if ismember(ctlbl, {'IC'}) 
+                funchandle = @(xout, hout, fout, it) [xout(:,it); index];
+            else
+                funchandle = @(xout, hout, fout, it) xout(index,it);
+            end
+            
         end
         
         function lblstr = retrieveLabel_coord(obj,session)
@@ -169,6 +178,17 @@ classdef PlotConfigSelection < handle
                     nr_of_extra_points = curve.getNrPoints() - 1;
                     riclen = curve.getRiccatiLength();
                     xout_index = xout_index +   (dim  *  nr_of_extra_points) + riclen;
+                elseif ismember(ctlbl, {'IC'})
+                    
+                    if (nargin < 3)
+                        NN = session.starterdata.settings.fourierModes;
+                        dim = numel(session.system.coordinatelist);
+                    else
+                        dim = xout_index;
+                        length = size(curve.x, 1);
+                        NN = ((length - 1)/ xout_index -1 )/2;
+                    end
+                    xout_index = dim  + 2 * NN * dim - 1;
                 end
                 
                 

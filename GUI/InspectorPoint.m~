@@ -120,9 +120,7 @@ classdef InspectorPoint < handle
                     x_index = x_index + riclen; %skip YS,YU  
                 end
                 
-                if obj.passon.curve.getCurveType().getLabel() == 'IC'
-                    x_index = length(X) - 2;
-                end
+                if obj.passon.curve.getCurveType().getLabel() == ''
                 
                 for i = 1:length(params)
                    data.parameters{i , 1} = params{i};

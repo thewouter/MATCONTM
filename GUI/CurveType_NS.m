@@ -11,7 +11,8 @@ classdef CurveType_NS < handle
         function obj = CurveType_NS()
            obj.branches = struct(); 
             
-           obj.branches.NS = { Branch('NS','NS', @init_NSm_NSm , 1 , false,'D') };
+           obj.branches.NS = { Branch('NS','NS', @init_NSm_NSm , 1 , false,'D') ,...
+                               Branch('IC','IC', @init_NSm_ICm , 1 , false,'IC')};
           
 
            obj.branches.CH = { Branch('CH','NS', @init_NSm_NSm , 1 , false,'D') };

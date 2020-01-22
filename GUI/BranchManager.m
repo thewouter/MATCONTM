@@ -152,15 +152,18 @@ classdef BranchManager < handle
                 return;
             end
             
-            ap = session.starterdata.getActiveParams();
+            ap = session.starterdata.getActiveParams(); %IDs of active params?
             
             switch (branch.getType)
                 case 'D'
                     [x0,v0] = callInit(branch, systemhandle, coord, par, ap, n);
                 case 'eps'
-                    amplitude_eps = session.starterdata.getSetting('amplitude');
+                    amplitude_eps = session.starterdata.getSetting('amplitude')
                     [x0,v0] = callInit(branch, systemhandle, amplitude_eps, coord, par, ap, n);
-                    
+                case 'IC'
+                    NN = session.starterdata.getSetting('fourierModes');
+                    amp = session.starterdata.getSetting('epsilon');
+                    [x0,v0] = callInit(branch, systemhandle, coord, par, NN, amp, ap, n);
                 case 'DS'
                     if (isempty(curve.startpoint) || (~ isfield(curve.startpoint.data, 'kappa')) )
                         errordlg(['init failed! Missing data for '  branch.getLabel() '. Initial point probably needs to be detected on a curve first.']);

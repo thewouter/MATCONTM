@@ -13,7 +13,7 @@ classdef Plot2D
 
     end
     properties(Constant)
-       COLORS = {'blue' , 'black' , 'magenta' , 'green' , 'cyan' };
+       COLORS = {'blue' , 'black' , 'magenta' , 'green' , 'cyan'};
       
 	
 
@@ -64,8 +64,12 @@ classdef Plot2D
             y0 = obj.ymap(xout, hout, fout , it-jj);
             y1 = obj.ymap(xout, hout, fout, it);
             
- 
-            line([x0 x1] , [y0 y1] , 'Parent' , obj.group  , obj.plotconfig.curve{:}, obj.plotops{:});
+            if ((numel(x0) ~= 1) && strcmp(session.currentCurveType.getLabel(), 'IC'))
+                PIC(session.currentcurve, x0(1:end-1), x0(end), y0(end), obj);
+            else
+                line([x0 x1] , [y0 y1] , 'Parent' , obj.group  , obj.plotconfig.curve{:}, obj.plotops{:}); 
+            end
+            
             
             
             if ((it > 2) && ( s.index == (it - 1) ))
@@ -143,14 +147,40 @@ classdef Plot2D
                 end
         
         end
+
+                
+        function plotIC(session, axeshandle , xmap , ymap, curve , pointselector , varargin)   
+            tempx = xmap(curve.x , curve.h , curve.f , 1);
+            tempy = ymap(curve.x , curve.h , curve.f , 1);
+            assert(numel(tempx) == numel(tempy), 'both axis need to be coordinates for IC curve plot')
+            if numel(tempx)>1
+                len = size(curve.x,2);
+                x_ax = zeros(size(curve.x,1)+1,len);
+                y_ax = x_ax;
+                for i = 1:len
+                    x_ax(:,i) = xmap(curve.x , curve.h , curve.f , i);
+                    y_ax(:,i) = ymap(curve.x , curve.h , curve.f , i);
+                end
+                xcoord = x_ax(end,end);
+                ycoord = y_ax(end,end);
+
+                PIC(curve, curve.x, xcoord, ycoord)
+            else
+                Plot2D.plotcurve(session, axeshandle, xmap, ymap, curve, pointselector, varargin{:})
+            end
+        end
         
         function plot(session, axeshandle, xmap , ymap , curve , pointselector , varargin)
-           if (strcmp('O' , curve.getCurveType().getLabel()))
-               Plot2D.plotOrbit2(session, axeshandle, xmap , ymap , curve , pointselector , varargin{:});
-           else
-               Plot2D.plotcurve(session, axeshandle , xmap , ymap, curve , pointselector , varargin{:});
+           switch curve.getCurveType().getLabel()
+               case 'O'
+                   Plot2D.plotOrbit2(session, axeshandle, xmap , ymap , curve , pointselector , varargin{:});
+               case 'IC'
+                   Plot2D.plotIC(session, axeshandle, xmap , ymap , curve , pointselector , varargin{:});
+               otherwise
+                   Plot2D.plotcurve(session, axeshandle , xmap , ymap, curve , pointselector , varargin{:});
            end
-        end
+      
+        end 
         
     end
     

@@ -3,7 +3,7 @@ function out = closedinvariantcurve
 % Fixed Point of  Map curve definition file for a problem in mapfile
 % 
 
-global cds fpmds
+global cds nsmds
     out{1}  = @curve_func;
     out{2}  = @defaultprocessor;
     out{3}  = @options;
@@ -32,13 +32,16 @@ dd=zeros(civds.n,length(theta));
 
 %Evaluate the map DD=F(x(t))-x(t+rho)
 for ii=1:length(theta)
-  dd(:,ii)=feval(civds.func,0,FCMAP(theta(ii),FC),ps{:},civds.pss{:})-FCMAP(theta(ii)+civds.rho,FC); %create all components of defining system
+  dd(:,ii)=feval(civds.func,0,FCMAP(theta(ii),FC, civds),ps{:},civds.pss{:})-FCMAP(theta(ii)+civds.rho,FC, civds); %create all components of defining system
 end
 
 dd = reshape(dd, civds.n*(1+2*NN), 1); %put all values in one long array instead of a matrix
 %---------------------------------------------------------------
 function jac = jacobian(varargin)
 global civds
+ps = arg(end-length(civds.ap)+1:end); % The Fourier coefficients as we got them from init, separated from the parameters
+
+ps = num2cell(ps); % Turn the parameters into a format that can be given as arguments
 
 NN=(length(FC)/civds.n-1)/2;
 theta=2*pi*(0:2*NN)/(2*NN+1);
@@ -77,7 +80,7 @@ function hess = hessians(varargin)
 %---------------------------------------------------------------
 function varargout = defaultprocessor(varargin)
 
-global cds nsmds
+global cds nsmds civds
 %elseif strcmp(arg,'defaultprocessor')
   if nargin > 2
     s = varargin{3};
@@ -86,8 +89,11 @@ global cds nsmds
  % compute eigenvalues?
   if (cds.options.Multipliers==1)
       n=nsmds.Niterations;
-      x0 = varargin{1}; [x,p] = rearr(x0); p = n2c(p);
-      jac =nsmjac(x,p,n);
+      x0 = varargin{1}; 
+      [x,p_cont] = rearr(x0); 
+      p = civds.p;
+      p(civds.ap) = p_cont;
+      jac =nsmjac(x,n2c(p),n);
       varargout{2} = eig(jac);
   else
       varargout{2}= nan;
@@ -96,14 +102,61 @@ global cds nsmds
   varargout{1} = 0;
 %-------------------------------------------------------------
 function option = options
-global cds nsmds
+global civds
   option = contset;
+  option.nphase = civds.n;
+  
   %----------------------------------------------------------------
 function [out, failed] = testf(id, x, v)
+    global civds
+    failed = [];
+    [~, active_param] = rearr(x);
+    param = civds.p;
+    param(civds.ap) = active_param;
+    set_param_indices = setdiff(1:numel(civds.p),civds.ap);
+    param(set_param_indices) = cell2mat(civds.pss);
+    param = n2c(param);
+    
+    for i=id
+        lastwarn('');
+        switch i
+            case 1 % QSN
+                jac=civds.jac; 
+                dim=civds.n;
+                NN=civds.NN;
+                theta=2*pi*(0:2*NN)/(2*NN+1);
+                AA=zeros((2*NN+1)*dim);
+
+                for ii=1:length(theta)
+                    padded_fourier_coef = [x(1:2*dim+civds.zerocomponent); 
+                        0; x(2*dim+1+civds.zerocomponent:end-2)];
+                    xx=FCMAP(theta(ii),padded_fourier_coef, civds);
+                    ind=(1:dim)+(ii-1)*dim;
+                    AA(ind,ind)=feval(jac,0,xx,param{:});
+                end
+                DF=civds.TT'*civds.BI*AA*civds.BB;
+                [~,D]=eig(DF);
+                full_eigenvalues=diag(D);
+                eigenvalues = sort(abs(full_eigenvalues));
+                grouped_ev = reshape(eigenvalues, numel(eigenvalues)/dim, dim);
+                grouped_ev_without_outliers = rmoutliers(grouped_ev);
+                means = mean(grouped_ev_without_outliers);
+
+                distance_from_unit = abs(means - 1);
+                [~, indices_sorted] = sort(distance_from_unit);
+                closest = (means(indices_sorted(1:2)));
+                out(1) = closest(1) + closest(2) - 2;
+            otherwise 
+                error('No such testfunction');
+        end
+    end
 %-----------------------------------------------------------------
 function [out, failed] = userf(userinf, id, x, v)
 %---------------------------------------------------------------------
 function [failed,s] = process(id, x, v, s)
+ printconsole('label = %s, x = %s \n', s.label , vector2string(x));
+ s.msg = sprintf('QSN \n'); 
+ failed = [];
 
 %------------------------------------------------------------
 function [S,L] = singmat
@@ -112,9 +165,9 @@ global fpmds cds
 % 1: testfunction must not vanish
 % everything else: ignore this testfunction
 
-  S = [];
+  S = [0];
 
-  L = [];
+  L = ['QSN  '];
 
 %--------------------------------------------------------
 function [x,v] = locate(id, x1, v1, x2, v2)
@@ -127,14 +180,14 @@ function varargout = done
 function [res,x,v] = adapt(x,v)
 res = []; % no re-evaluations needed
 
-  
-
-
 %----------------------------------------------------------------
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ---------------------------------------------------------------
 
 function [x,p] = rearr(x0)
+global civds
+x = x0(1:end-2);
+p = x0(end-2+1:end);
 
 % ---------------------------------------------------------------
 function [x,v] = locateBP(id, x1, v1, x2, v2)

@@ -27,43 +27,43 @@ end
 result=[];
 return
 
-[Q,R]=qr([real(V(:,idx1)) imag(V(:,idx1))]);
-borders.v=Q(:,1:2);
-[V,D] = eig(jac');
-% find pair of complex eigenvalues
-d = diag(D);
-i=1;
-for j=1:nphase
-    if abs(d(j))==1
-        if imag(d(j))~=0
-            b(i)=d(j);i=i+1;
-        end
-    end
-end
-idx1=0;idx2=0;
-if size(b)~=0
-  m=size(b);
-  for i=1:m
-        for j=i+1:m
-            if b(i)==conj(b(j))
-                idx1=i;idx2=j;
-            end
-        end
-  end
-end
-[Q,R]=qr([real(V(:,idx1)) imag(V(:,idx1))]); 
-borders.w=Q(:,1:2);
-k=real(d(idx1)*d(idx2));
-% calculate eigenvalues
-% ERROR OR WARNING
-RED=jac*jac+k*eye(nphase);
-jacp=mjacp(x1,p1,n);
-A=[jac  jacp zeros(nphase,1)];
-[Q,R]=qr(A');
-Bord=[RED borders.w;borders.v' zeros(2)];
-bunit=[zeros(nphase,2);eye(2)];
-vext=Bord\bunit;
-wext=Bord'\bunit;
+% [Q,R]=qr([real(V(:,idx1)) imag(V(:,idx1))]);
+% borders.v=Q(:,1:2);
+% [V,D] = eig(jac');
+% % find pair of complex eigenvalues
+% d = diag(D);
+% i=1;
+% for j=1:nphase
+%     if abs(d(j))==1
+%         if imag(d(j))~=0
+%             b(i)=d(j);i=i+1;
+%         end
+%     end
+% end
+% idx1=0;idx2=0;
+% if size(b)~=0
+%   m=size(b);
+%   for i=1:m
+%         for j=i+1:m
+%             if b(i)==conj(b(j))
+%                 idx1=i;idx2=j;
+%             end
+%         end
+%   end
+% end
+% [Q,R]=qr([real(V(:,idx1)) imag(V(:,idx1))]); 
+% borders.w=Q(:,1:2);
+% k=real(d(idx1)*d(idx2));
+% % calculate eigenvalues
+% % ERROR OR WARNING
+% RED=jac*jac+k*eye(nphase);
+% jacp=mjacp(x1,p1,n);
+% A=[jac  jacp zeros(nphase,1)];
+% [Q,R]=qr(A');
+% Bord=[RED borders.w;borders.v' zeros(2)];
+% bunit=[zeros(nphase,2);eye(2)];
+% vext=Bord\bunit;
+% wext=Bord'\bunit;
             
 % ---------------------------------------------------------------
 function [x,p] = rearr(x0)

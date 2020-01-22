@@ -1,0 +1,41 @@
+function diverges=ICstop(nphase, coeff, CN, nAv)
+    %
+    % ICstop(x, N)
+    %
+    % Calculates if the fourier coefficients converge in C_N
+    % options is a option-vector created with CONTSET
+    % Three parameters are mandatory.
+    
+    convergenve_factor = 2;
+
+    length = size(coeff,1);
+    N = ((length - 1)/ nphase -1 )/2;
+
+    y = coeff(:,1);
+    y = [y(1:2*nphase); 0; y(2*nphase+1:end-2)];
+    fc=reshape(y(nphase+1:end),nphase,2*N); %reshape coeff such that different dimensions are seperated
+
+    f = abs(fftn(fc)); %get fourier transfrom of fourier coeff
+    peaks = zeros(1,nphase);
+    for ii=1:nphase
+        [~, p] = findpeaks(f(ii,:));
+        if numel(p) == 0
+            p = [1];
+        end
+        peaks(ii) = min(p);
+    end
+
+    max_period = max(peaks);
+
+    data = movmean(abs(fc), max_period, 2);
+    data_length = numel(data)/nphase;
+    
+    if nargin == 3 %no nAv given
+        nAv = round(data_length / 4);
+    end
+    %Fourier coefficients diverge if the average of the third qarter is
+    %smaller than the sum of the fourth quarter
+    data = data.*reshape( cat( 1, [1:15], [1:15] ), 1, [] ).^CN;
+    diverges = sum(sum(data(:,N:N+nAv))) * convergenve_factor < sum(sum(data(:,end-nAv:end)));
+    diverges
+end

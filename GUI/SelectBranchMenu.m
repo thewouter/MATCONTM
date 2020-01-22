@@ -46,7 +46,7 @@ classdef SelectBranchMenu < handle
 
         end
         function setSelected(obj, branchmanager)
-           j =  branchmanager.getSelectionIndex();           
+           j =  branchmanager.getSelectionIndex();        
            for i = 1:length(obj.menuitems)
               set(obj.menuitems{i} , 'Checked' , bool2str( i == j)); 
            end

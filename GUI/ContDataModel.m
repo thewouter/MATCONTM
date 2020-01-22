@@ -33,6 +33,7 @@ classdef ContDataModel < handle
             
             obj.stop.MaxNumPoints = DefaultValues.CONTINUERDATA.MaxNumPoints;
             obj.stop.ClosedCurve = DefaultValues.CONTINUERDATA.ClosedCurve;
+            obj.stop.NonCNFourier = DefaultValues.CONTINUERDATA.NonCNFourier;
             
             if (nargin >= 1)
                 obj.frozen = varargin{1};

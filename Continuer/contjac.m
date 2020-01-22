@@ -6,6 +6,9 @@ function jac = contjac(x)
 %  in curve file, which is global 
 global cds
 
+
+
+
 if nargin ~= 1 
   error('contjac needs a point');
 end

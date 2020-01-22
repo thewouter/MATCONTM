@@ -14,7 +14,7 @@ classdef SyncHandles < handle
            obj.predicate = predicate;
            
            model.addlistener('stateChanged' , @(src,ev) obj.sync() );
- 
+           
            sync(obj);
        end
        
